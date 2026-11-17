@@ -1,0 +1,75 @@
+/* Complementos da tela do WhatsApp; a base vem do styles.css da Máquina de Leads. */
+a.aba { text-decoration: none; display: inline-flex; align-items: center; }
+.opcoes { border: 0; margin: 0; padding: 0; min-width: 0; }
+.opcoes:disabled { opacity: .55; }
+.opcoes:disabled .fonte, .opcoes:disabled .check { cursor: not-allowed; }
+
+/* conexão */
+.conexao p { margin: 0 0 10px; font-size: 13.5px; line-height: 1.5; }
+.conexao .btn-ouro { width: 100%; }
+.conexao .linha-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.conexao .linha-acoes .btn-sec { flex: 1; margin: 0; }
+.estado-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--fixo-bg); color: var(--fixo-fg); margin-bottom: 10px; }
+.estado-pill i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.estado-pill.ok { background: var(--cel-bg); color: var(--cel-fg); }
+.estado-pill.espera { background: var(--gold-100); color: var(--gold-600); }
+.estado-pill.espera i { animation: pulsar 1.2s ease-in-out infinite; }
+@keyframes pulsar { 50% { opacity: .25; } }
+.qr-caixa { display: grid; place-items: center; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 4px 0 12px; }
+.qr-caixa img { width: 100%; max-width: 260px; height: auto; image-rendering: pixelated; display: block; }
+.passos { margin: 0 0 10px; padding-left: 20px; font-size: 13px; line-height: 1.55; color: var(--ink); }
+.passos li { margin-bottom: 3px; }
+.passos b { color: var(--navy-900); }
+.codigo-pareamento { font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 30px; font-weight: 800; letter-spacing: 4px; text-align: center; color: var(--navy-900); background: var(--gold-100); border: 1px dashed var(--gold-500); border-radius: 10px; padding: 14px 8px; margin: 4px 0 12px; user-select: all; }
+.form-codigo { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.form-codigo .linha { display: flex; gap: 8px; }
+.form-codigo .linha input { flex: 1; min-width: 0; }
+.form-codigo .linha .btn-sec { margin: 0; white-space: nowrap; }
+.conta { display: flex; gap: 10px; align-items: center; background: #F7F9FC; border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; margin-bottom: 10px; }
+.conta .avatar { width: 36px; height: 36px; border-radius: 50%; background: #1FA855; color: #fff; display: grid; place-items: center; flex: none; }
+.conta .avatar svg { width: 20px; height: 20px; }
+.conta strong { display: block; color: var(--navy-900); font-size: 14px; }
+.conta small { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.sincronia { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: 0 0 6px; }
+.sincronia b { color: var(--navy-900); font-variant-numeric: tabular-nums; }
+.btn-sec.perigo { color: #9B2C2C; }
+.btn-sec.perigo.confirmar { background: #9B2C2C; color: #fff; border-color: #9B2C2C; }
+
+/* grupos */
+.bloco-grupos { margin-top: 14px; }
+.grupos-busca { display: flex; gap: 8px; align-items: stretch; }
+.grupos-busca input { flex: 1; min-width: 0; }
+.grupos-busca .segmentado { flex: none; }
+.grupos-acoes { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 2px 0 8px; }
+.grupos { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 9px; max-height: 330px; overflow: auto; background: #fff; }
+.grupos li { border-bottom: 1px solid #EEF1F5; }
+.grupos li:last-child { border-bottom: 0; }
+.grupos label { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 11px; cursor: pointer; }
+.grupos label:hover { background: #F7F9FC; }
+.grupos input { width: 16px; height: 16px; accent-color: var(--navy-900); margin: 0; }
+.grupos .g-nome { font-size: 13.5px; font-weight: 600; color: var(--navy-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grupos .g-sub { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.grupos .g-sub .badge { margin-left: 4px; }
+.grupos .g-qtd { font-size: 12.5px; font-weight: 800; color: var(--navy-800); font-variant-numeric: tabular-nums; }
+.grupos li.marcado label { background: #FBF6E6; }
+.grupos .vazia { padding: 18px 12px; text-align: center; font-size: 13px; color: var(--muted); }
+
+/* resultados */
+.fontes-status i.espera { background: var(--gold-500); }
+.linha-vazia td { text-align: center; padding: 30px; }
+.tabela-wa tbody tr { cursor: default; }
+.tabela-wa .nome { font-weight: 700; color: var(--navy-900); }
+.tabela-wa .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.tabela-wa .grupos-col { font-size: 12.5px; color: var(--ink); max-width: 320px; }
+.tabela-wa .grupos-col div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabela-wa .grupos-col small { color: var(--muted); }
+.tel.oculto .t { background: #F2F4F7; color: var(--muted); font-weight: 500; font-style: italic; }
+.vazio svg { color: #1FA855; }
+
+@media (max-width: 640px) {
+  .abas { overflow-x: auto; }
+  .aba { white-space: nowrap; }
+  .grupos-busca { flex-direction: column; }
+  .tabela-wa th:nth-child(4), .tabela-wa td:nth-child(4) { display: none; }
+  .codigo-pareamento { font-size: 26px; letter-spacing: 3px; }
+}

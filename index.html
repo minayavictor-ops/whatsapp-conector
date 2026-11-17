@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WhatsApp · Máquina de Leads</title>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="app.css">
+<link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+<header class="topo">
+  <div class="marca">
+    <span class="logo" aria-hidden="true"><img src="/img/icone-maquina-de-leads.webp" alt="" width="44" height="44"></span>
+    <div>
+      <h1>Máquina de Leads</h1>
+      <p>Receita Federal · Google Maps · Sites e listas · WhatsApp</p>
+    </div>
+  </div>
+  <nav class="abas" aria-label="Seções">
+    <a class="aba" href="/">Buscar empresas</a>
+    <a class="aba" href="/#extrair">Extrair de sites e listas</a>
+    <a class="aba ativa" href="./" aria-current="page">WhatsApp</a>
+  </nav>
+  <div class="fontes-status" id="topoStatus"><span><i class="off"></i>WhatsApp</span></div>
+  <a class="sair" href="/api/sair">Sair</a>
+</header>
+
+<main class="grade">
+  <aside class="painel">
+    <section class="etapa">
+      <h2><span class="num">1</span> Conectar o WhatsApp</h2>
+      <div id="conexao" class="conexao" aria-live="polite"><p class="dica">Verificando a conexão…</p></div>
+    </section>
+
+    <form id="formExtrair" autocomplete="off">
+      <fieldset id="opcoes" class="opcoes" disabled>
+        <section class="etapa">
+          <h2><span class="num">2</span> De onde tirar os contatos</h2>
+          <div class="fontes">
+            <label class="fonte"><input type="checkbox" id="fGrupos" checked>
+              <span><strong>Membros de grupos</strong><small>Escolha os grupos na lista abaixo</small></span></label>
+            <label class="fonte"><input type="checkbox" id="fAgenda">
+              <span><strong>Contatos salvos</strong><small><span id="infoAgenda">Quem está na agenda do celular e usa WhatsApp</span></small></span></label>
+            <label class="fonte"><input type="checkbox" id="fConversas">
+              <span><strong>Conversas</strong><small><span id="infoConversas">Pessoas com quem você já conversou</span></small></span></label>
+          </div>
+
+          <div id="blocoGrupos" class="bloco-grupos">
+            <div class="grupos-busca">
+              <input type="search" id="buscaGrupo" placeholder="Procurar grupo" aria-label="Procurar grupo">
+              <div class="segmentado compacto" id="ordemGrupos" role="radiogroup" aria-label="Ordenar grupos">
+                <label><input type="radio" name="ordemGrupos" value="nome" checked><span>A–Z</span></label>
+                <label><input type="radio" name="ordemGrupos" value="maiores"><span>Maiores</span></label>
+              </div>
+            </div>
+            <div class="grupos-acoes">
+              <button type="button" class="link" id="marcarTodos">Marcar os visíveis</button>
+              <button type="button" class="link" id="desmarcarTodos">Desmarcar todos</button>
+              <button type="button" class="link" id="atualizarGrupos">Atualizar lista</button>
+            </div>
+            <ul class="grupos" id="listaGrupos" aria-label="Grupos"></ul>
+            <p class="dica" id="gruposInfo"></p>
+          </div>
+        </section>
+
+        <section class="etapa">
+          <h2><span class="num">3</span> Filtros <span class="opc">opcional</span></h2>
+          <label class="check"><input type="checkbox" id="soBrasil" checked> Somente números do Brasil (+55)</label>
+          <label class="rotulo" for="ddds">DDDs <span class="opc">separe por vírgula; em branco = todos</span></label>
+          <input id="ddds" type="text" inputmode="numeric" placeholder="Ex.: 61, 11">
+          <label class="check"><input type="checkbox" id="comOcultos"> Incluir membros com número oculto</label>
+          <p class="dica">Em comunidades e em alguns grupos o WhatsApp esconde o número de quem não está na sua agenda. Esses membros só podem ser listados pelo nome, sem telefone.</p>
+        </section>
+      </fieldset>
+
+      <div class="rodape-form">
+        <p class="previa" id="previa">Conecte o WhatsApp para começar.</p>
+        <div class="acoes-form"><button type="submit" class="btn-ouro" id="btnExtrair" disabled>Extrair contatos</button></div>
+      </div>
+    </form>
+  </aside>
+
+  <section class="resultados" aria-live="polite">
+    <div class="barra-status" id="barraStatus" hidden>
+      <div class="progresso"><span id="progressoBarra"></span></div>
+      <p id="statusTexto">Preparando…</p>
+      <button type="button" class="btn-sec pequeno" id="btnParar">Parar</button>
+    </div>
+    <div id="avisos" class="avisos"></div>
+
+    <div class="kpis">
+      <div class="kpi destaque"><span id="kTotal">0</span><small>contatos</small></div>
+      <div class="kpi"><span id="kNome">0</span><small>com nome</small></div>
+      <div class="kpi"><span id="kGrupos">0</span><small>de grupos</small></div>
+      <div class="kpi"><span id="kAgenda">0</span><small>da agenda</small></div>
+      <div class="kpi"><span id="kConversas">0</span><small>de conversas</small></div>
+    </div>
+
+    <div class="ferramentas">
+      <input type="search" id="filtroTexto" placeholder="Filtrar (nome, número, grupo…)">
+      <div class="exportar">
+        <span class="exp-rotulo" id="expRotulo">Exportar</span>
+        <button type="button" class="btn-exp" data-formato="xlsx" disabled>XLSX</button>
+        <button type="button" class="btn-exp" data-formato="csv" disabled>CSV</button>
+      </div>
+    </div>
+
+    <div class="tabela-wrap">
+      <table class="tabela tabela-wa">
+        <thead><tr><th>Nome</th><th>WhatsApp</th><th>Origem</th><th>Grupos</th></tr></thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <div class="vazio" id="vazio">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3C8.8 3 3 8.7 3 15.8c0 2.3.6 4.5 1.8 6.5L3 29l6.9-1.8c1.9 1 4 1.6 6.1 1.6 7.2 0 13-5.7 13-12.8S23.2 3 16 3zm0 23.5c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.1 1.1-4-.3-.4c-1.1-1.7-1.7-3.6-1.7-5.6C5.2 9.9 10 5.2 16 5.2s10.8 4.7 10.8 10.6S22 26.5 16 26.5z"/></svg>
+        <h3>Contatos do seu WhatsApp</h3>
+        <p>Conecte o WhatsApp, escolha os grupos e clique em <strong>Extrair contatos</strong>. A lista aparece aqui, pronta para exportar em XLSX ou CSV.</p>
+      </div>
+    </div>
+    <div class="paginacao" id="paginacao"></div>
+  </section>
+</main>
+
+<footer class="rodape">Os contatos vêm da sua própria conta do WhatsApp, conectada como um aparelho a mais. Use com responsabilidade: disparos em massa para quem não conhece você levam ao bloqueio do número, e a LGPD exige base legal e respeito a pedidos de descadastro.</footer>
+<script src="app.js"></script>
+</body>
+</html>
