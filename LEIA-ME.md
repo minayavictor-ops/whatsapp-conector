@@ -8,18 +8,25 @@ A tela do extrator fica em `vaileads.netlify.app/whatsapp/`, protegida pela mesm
 
 O login é feito pela própria tela: QR Code (em Aparelhos conectados, no celular) ou código de 8 letras (Conectar com número de telefone), para quando a pessoa está no próprio celular.
 
+## Uma conexão por pessoa
+
+Todos entram na Máquina de Leads com a mesma senha, mas cada navegador recebe da função `whatsapp` um cookie próprio, aleatório e secreto (`vai_whatsapp`, HttpOnly, válido só em `/whatsapp`). O conector separa as conexões por esse cookie, cada uma com sua pasta no disco: uma pessoa nunca vê o WhatsApp, os grupos ou as extrações de outra. Quem trocar de computador ou de navegador, ou apagar os cookies, conecta de novo.
+
+Conexões sem uso por 20 minutos adormecem para liberar memória e voltam sozinhas, sem QR Code, quando a pessoa abre a tela de novo. Ficam no máximo 6 abertas ao mesmo tempo (variável `LIMITE_SESSOES`); com mais gente usando junto, suba o plano do Render para Standard e aumente esse número.
+
 ## Arquivos
 
-- `index.mjs`: liga o servidor e retoma a sessão salva, se houver.
+- `index.mjs`: liga o servidor.
+- `sessoes.mjs`: separa uma conexão por pessoa, adormece as ociosas e retoma.
 - `sessao.mjs`: conexão com o WhatsApp (biblioteca Baileys), sincronização de contatos, leitura dos grupos e extração.
 - `server.mjs`: endereços da API e entrega da tela, todos exigindo o token.
-- `public/`: a tela do extrator (usa o visual e o gerador de planilhas da Máquina de Leads).
+- `index.html`, `app.js` e `app.css` (na raiz ou em `public/`): a tela do extrator, que usa o visual e o gerador de planilhas da Máquina de Leads.
 
 ## Render
 
 Web Service Node, região Ohio, plano Starter. Comando de build `npm install` e de início `node index.mjs`. Variável obrigatória: `CONECTOR_TOKEN`, igual à `WHATSAPP_CONECTOR_TOKEN` do Netlify. No Netlify também vai `WHATSAPP_CONECTOR_URL` com o endereço deste serviço.
 
-A sessão do WhatsApp fica no disco do serviço. No plano Starter esse disco é apagado a cada nova publicação ou reinício, e aí basta ler o QR Code de novo. Para não precisar reconectar nunca, adicione um disco no Render (1 GB basta) montado em `/var/data` e crie a variável `PASTA_SESSAO=/var/data/sessao`.
+A sessão do WhatsApp fica no disco do serviço. No plano Starter esse disco é apagado a cada nova publicação ou reinício, e aí basta ler o QR Code de novo. Para não precisar reconectar nunca, adicione um disco no Render (1 GB basta para várias pessoas) montado em `/var/data` e crie a variável `PASTA_SESSAO=/var/data/sessao`.
 
 ## Atualizar a biblioteca do WhatsApp
 

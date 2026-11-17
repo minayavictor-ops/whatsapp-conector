@@ -6,6 +6,7 @@ import crypto from 'node:crypto';
 import QRCode from 'qrcode';
 
 const usuario = (jid) => String(jid || '').split('@')[0].split(':')[0];
+const versaoCompartilhada = { valor: undefined, em: 0 }; // versão do WhatsApp Web, igual para todas as sessões
 const soDigitos = (v) => String(v || '').replace(/\D/g, '');
 
 export function criarSessao({ baileys, pasta, logger, browser }) {
@@ -29,7 +30,7 @@ export function criarSessao({ baileys, pasta, logger, browser }) {
     aviso: '',
     tentativas: 0,
     parando: false,
-    versao: undefined,
+    temConta: false, // já houve login neste navegador (há credenciais salvas)
     historico: { ativo: false, lotes: 0, progresso: null, ultimoEm: 0 },
     porPn: new Map(), // número (só dígitos) -> registro
     porLid: new Map(), // LID (só dígitos) -> registro
@@ -138,6 +139,7 @@ export function criarSessao({ baileys, pasta, logger, browser }) {
   }
 
   async function apagarSessao() {
+    s.temConta = false;
     clearTimeout(s.salvarTimer); s.salvarTimer = null;
     await rm(pasta, { recursive: true, force: true });
     limparMemoria();
@@ -145,12 +147,14 @@ export function criarSessao({ baileys, pasta, logger, browser }) {
 
   // ------------------------------------------------------------------ conexão
   async function versaoAtual() {
-    if (s.versao !== undefined) return s.versao;
+    const v = versaoCompartilhada;
+    if (v.valor !== undefined && Date.now() - v.em < (v.valor ? 6 : 0.25) * 3600 * 1000) return v.valor;
     try {
       const r = await Promise.race([fetchLatestBaileysVersion(), new Promise((_, n) => setTimeout(() => n(new Error('tempo')), 8000))]);
-      s.versao = r?.version || null;
-    } catch { s.versao = null; }
-    return s.versao;
+      v.valor = r?.version || null;
+    } catch { v.valor = null; }
+    v.em = Date.now();
+    return v.valor;
   }
 
   async function abrir() {
@@ -206,6 +210,7 @@ export function criarSessao({ baileys, pasta, logger, browser }) {
       if (s.telefonePedido && !s.codigo) await pedirCodigo();
     }
     if (connection === 'open') {
+      s.temConta = true;
       s.estado = 'conectado';
       s.qr = null; s.qrImagem = null; s.codigo = null; s.codigoPara = null; s.telefonePedido = null;
       s.tentativas = 0; s.aviso = '';
@@ -290,7 +295,8 @@ export function criarSessao({ baileys, pasta, logger, browser }) {
   }
 
   async function cancelar() {
-    if (s.estado === 'conectado') return status();
+    // só cancela um login em andamento; uma conta já conectada só sai pelo botão Desconectar
+    if (s.estado === 'conectado' || s.temConta || s.sock?.authState?.creds?.me) return status();
     s.parando = true;
     try { s.sock?.end?.(undefined); } catch { /* nada */ }
     s.sock = null;
@@ -317,6 +323,8 @@ export function criarSessao({ baileys, pasta, logger, browser }) {
     try {
       await access(path.join(pastaCredenciais, 'creds.json'));
     } catch { return false; }
+    s.temConta = true;
+    s.estado = 'reconectando';
     await abrir();
     return true;
   }
@@ -497,6 +505,7 @@ export function criarSessao({ baileys, pasta, logger, browser }) {
       codigo: s.codigo,
       codigoPara: s.codigoPara,
       eu: s.eu,
+      jaConectou: Boolean(s.temConta || s.sock?.authState?.creds?.me),
       aviso: s.aviso,
       agenda,
       conversas: s.conversas.size,

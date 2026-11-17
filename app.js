@@ -108,6 +108,7 @@ function renderConexao() {
       <p class="sincronia"><b>${num(st.grupos)}</b> grupos · <b>${num(st.agenda)}</b> contatos salvos · <b>${num(st.conversas)}</b> conversas${st.sincronizando ? ' · sincronizando…' : ''}</p>
       ${st.sincronizando ? '<p class="dica">Logo depois de conectar, o WhatsApp manda a agenda e as conversas aos poucos. Os grupos já podem ser extraídos.</p>' : ''}
       ${htmlAviso(st.aviso)}
+      <p class="dica privado">Esta conexão é só deste navegador: outras pessoas que usam a Máquina de Leads não veem o seu WhatsApp. Em computador compartilhado, clique em Desconectar ao terminar.</p>
       <div class="linha-acoes"><button type="button" class="btn-sec perigo" data-acao="desconectar">Desconectar</button></div>`;
   } else if (st.estado === 'aguardando' && st.codigo) {
     html = `<span class="estado-pill espera"><i></i>Aguardando o código no celular</span>
@@ -130,14 +131,18 @@ function renderConexao() {
       <p class="dica">O código muda sozinho a cada poucos segundos. Esta tela atualiza automaticamente.</p>
       <div class="linha-acoes"><button type="button" class="btn-sec" data-acao="cancelar">Cancelar</button></div>
       ${htmlFormCodigo('Prefere conectar com um código?')}`;
-  } else if (['iniciando', 'reconectando', 'aguardando'].includes(st.estado)) {
-    html = `<span class="estado-pill espera"><i></i>${st.estado === 'reconectando' ? 'Reconectando…' : 'Abrindo a conexão…'}</span>
+  } else if (st.estado === 'reconectando' && st.jaConectou) {
+    html = `<span class="estado-pill espera"><i></i>Reconectando ao seu WhatsApp…</span>
+      <p class="dica">Retomando a conexão que você já tinha feito neste navegador. Não precisa ler o QR Code de novo.</p>`;
+  } else if (['iniciando', 'aguardando', 'reconectando'].includes(st.estado)) {
+    html = `<span class="estado-pill espera"><i></i>${st.estado === 'reconectando' ? 'Tentando falar com o WhatsApp…' : 'Abrindo a conexão…'}</span>
       <p class="dica">Falando com o WhatsApp. Leva alguns segundos.</p>
       <div class="linha-acoes"><button type="button" class="btn-sec" data-acao="cancelar">Cancelar</button></div>`;
   } else {
     html = `<span class="estado-pill"><i></i>Desconectado</span>
       ${htmlAviso(st.aviso)}
       <p>Conecte o WhatsApp de onde quer tirar os contatos. Ele entra como um aparelho conectado, igual ao WhatsApp Web, e o celular continua funcionando normalmente.</p>
+      <p class="dica privado">A conexão fica só neste navegador. Quem usa a Máquina de Leads em outro computador não vê o seu WhatsApp, e você não vê o de ninguém.</p>
       <button type="button" class="btn-ouro" data-acao="qr">Conectar com QR Code</button>
       ${htmlFormCodigo('Está no celular? Conecte com um código')}`;
   }

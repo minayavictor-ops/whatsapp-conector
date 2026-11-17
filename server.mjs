@@ -1,5 +1,6 @@
 // Servidor HTTP do conector: tela do extrator e API. Tudo exige o token secreto,
-// que só a ponte do vaileads (função /whatsapp no Netlify) conhece.
+// que só a ponte do vaileads (função /whatsapp no Netlify) conhece. A API também exige o
+// cabeçalho x-sessao (cookie individual do navegador), que escolhe a conexão de cada pessoa.
 import http from 'node:http';
 import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -46,7 +47,7 @@ async function lerJson(req) {
   try { return JSON.parse(Buffer.concat(partes).toString('utf8')); } catch { throw Object.assign(new Error('JSON inválido.'), { status: 400 }); }
 }
 
-export function criarServidor({ sessao, token, pastaPublica, logger }) {
+export function criarServidor({ gerente, token, pastaPublica, logger }) {
   const cacheArquivos = new Map();
   async function arquivo(nome) {
     if (!cacheArquivos.has(nome) || process.env.NODE_ENV === 'development') cacheArquivos.set(nome, await readFile(path.join(pastaPublica, nome)));
@@ -54,11 +55,11 @@ export function criarServidor({ sessao, token, pastaPublica, logger }) {
   }
 
   const rotas = {
-    'GET /api/status': () => sessao.status(),
-    'POST /api/conectar': async (corpo) => sessao.conectar({ telefone: corpo.telefone }),
-    'POST /api/cancelar': () => sessao.cancelar(),
-    'POST /api/desconectar': () => sessao.desconectar(),
-    'GET /api/grupos': async (_c, url) => {
+    'GET /api/status': (sessao) => sessao.status(),
+    'POST /api/conectar': (sessao, corpo) => sessao.conectar({ telefone: corpo.telefone }),
+    'POST /api/cancelar': (sessao) => sessao.cancelar(),
+    'POST /api/desconectar': (sessao) => sessao.desconectar(),
+    'GET /api/grupos': async (sessao, _c, url) => {
       const forcar = url.searchParams.get('atualizar') === '1';
       let atualizando = false;
       try {
@@ -72,9 +73,9 @@ export function criarServidor({ sessao, token, pastaPublica, logger }) {
       }
       return { grupos: sessao.resumoGrupos(), atualizando, em: sessao.status().gruposEm };
     },
-    'POST /api/extrair': async (corpo) => sessao.iniciarExtracao(corpo),
-    'POST /api/extracao/cancelar': () => sessao.cancelarExtracao(),
-    'GET /api/extracao': (_c, url) => {
+    'POST /api/extrair': (sessao, corpo) => sessao.iniciarExtracao(corpo),
+    'POST /api/extracao/cancelar': (sessao) => sessao.cancelarExtracao(),
+    'GET /api/extracao': (sessao, _c, url) => {
       const limite = Math.min(5000, Math.max(100, Number(url.searchParams.get('limite')) || 3000));
       return sessao.linhasExtracao(url.searchParams.get('id'), url.searchParams.get('desde'), limite);
     },
@@ -95,7 +96,8 @@ export function criarServidor({ sessao, token, pastaPublica, logger }) {
       const rota = rotas[`${req.method} ${url.pathname}`];
       if (!rota) return responder(res, 404, { erro: 'Rota não encontrada.' });
       const corpo = req.method === 'POST' ? await lerJson(req) : {};
-      const resposta = await rota(corpo, url);
+      const sessao = await gerente.obter(req.headers['x-sessao']);
+      const resposta = await rota(sessao, corpo, url);
       return responder(res, 200, resposta ?? {});
     } catch (e) {
       const status = e.status || 500;
